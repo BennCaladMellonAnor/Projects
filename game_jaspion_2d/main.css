@@ -92,3 +92,13 @@ canvas{
 	background-color:lightyellow;
 	border-color:white;
 }
+.jaspion-char{
+	position:absolute;
+	bottom:30px;
+	left:calc(50% - 15%/2);
+	width:15%;
+}
+.fundo{
+	width:100%;
+	height:100%;
+}

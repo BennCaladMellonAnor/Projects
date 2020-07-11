@@ -1,5 +1,7 @@
 console.log('[Dev.Mellanor] Jaspion 2D')
 
+let frames = 0
+
 reseta_div_game()
 
 function reseta_div_game() {
@@ -8,9 +10,10 @@ function reseta_div_game() {
 	tag.classList.add('game')
 	tag.setAttribute('game', '')
 	fds.appendChild(tag)
+	return
 }
 
-const game = document.querySelector('[game]')
+let game = document.querySelector('[game]')
 
 const construtora = {
 	img(index, css, src){
@@ -42,6 +45,14 @@ function destruidora(attribute){
 		let item = seleciona[i]
 		item.remove()
 	}*/	
+	/*const seleciona = document.querySelector(attribute).remove()
+	reseta_div_game()*/
+
+	const seleciona = document.querySelector(attribute)
+	while (seleciona.firstChild) {
+		seleciona.removeChild(seleciona.firstChild)
+	}
+
 }
 
 const menu = {
@@ -49,19 +60,66 @@ const menu = {
 		construtora.img('img', 'menu', 'img/jaspion-capa-.jpg')
 		setTimeout(() => {
 			menu.grade_menu()
-		}, 3000)
+		}, 30)
 	},
 	grade_menu(){
 		construtora.node('div', 'grade-menu', 'O fantastico Jaspion')
 		construtora.img('img', 'load-jaspion', 'img/jaspion_1.gif')
 		setTimeout(() =>{
 			construtora.button('input', 'menu-button', 'onclick', 'menu.click()', 'Play')
-		}, 3000)
+		}, 30)
 	},
 	click(){
-		console.log('here call "destruidora"')
+		destruidora('[game]')
+		setTimeout(() => {
+			Telas.jogo()
+		}, 3000)
 	}
 }
 
+const jaspion_char = {
+	speed: 30,
+	desenha(){
+		construtora.img('img', 'jaspion-char', 'img/jaspion_1.gif')
+	},
+}
 
-menu.desenha()
+const fundo = {
+	desenha(){
+		construtora.img ('img', 'fundo', 'img/pretty.gif')
+	},
+}
+
+const Telas ={
+	jogo(){
+		fundo.desenha()
+		jaspion_char.desenha()
+
+		const chao = {
+			atualiza(){
+				const img = document.getElementsByTagName('img')[1]
+				img.setAttribute('id', 'img')
+
+				const imgid = document.getElementById('img').offsetHeight
+				const local = img.getBoundingClientRect();
+				const movimentoDoChao = 1;
+      			const repeteEm = local.top / 2;
+      			const movimentacao = local.left - movimentoDoChao;
+
+      			console.log(img.style.left)
+      
+    		  	local.left = movimentacao % repeteEm;
+			}
+		}
+		chao.atualiza()
+	}
+}
+
+function loop() {
+	menu.desenha()
+	Telas.jogo()
+
+	/*frames = frames + 1;
+  requestAnimationFrame(loop);*/
+}
+loop()
