@@ -1,5 +1,5 @@
 //Variaveis do jogo
-var canvas, ctx, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 6, estadoAtual,
+var canvas, ctx, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 6, estadoAtual, record,
 estados={
 	jogar: 0,
 	jogando: 1,
@@ -24,6 +24,7 @@ bloco = {
 	velocidade: 0,
 	forcaDoPulo: 23.6,
 	qntPulos: 0,
+	score: 0,
 	atualiza(){
 		this.velocidade += this.gravidade
 		this.y += this.velocidade
@@ -45,7 +46,18 @@ bloco = {
 	desenha(){
 		ctx.fillStyle = this.cor
 		ctx.fillRect(this.x, this.y, this.largura, this.altura)
-	}
+	},
+	reset(){
+		this.velocidade = 0
+		this.y = 0
+
+		if (this.score > record){
+			localStorage.setItem('record', this.score)
+			record = this.score
+		}
+
+		this.score = 0
+	},
 },
 
 obstaculos = {
@@ -55,7 +67,8 @@ obstaculos = {
 	insere(){
 		this._obs.push({
 			x: LARGURA,
-			largura: 30 + Math.floor(20 * Math.random()),
+			// largura: 30 + Math.floor(20 * Math.random()),
+			largura: 50,
 			altura: 40 + Math.floor(120 * Math.random()),
 			cor: this.cores[Math.floor(5 * Math.random())],
 		})
@@ -75,6 +88,8 @@ obstaculos = {
 			//colisão
 			if(bloco.x < obs.x + obs.largura && bloco.x + bloco.largura >= obs.x && bloco.y + bloco.altura >= chao.y - obs.altura){
 				estadoAtual = estados.perdeu
+			}else if(obs.x == 0){
+				bloco.score++
 			}else if (obs.x <= -obs.largura){
 				this._obs.splice(i, 1)
 				tam--
@@ -121,6 +136,13 @@ function main(){
 
 	//Chama o looping do jogo
 	estadoAtual = estados.jogar
+
+	record = localStorage.getItem('record')
+
+	if (record == null){
+		record = 0
+	}
+
 	roda()
 }
 function clique(event){
@@ -130,8 +152,8 @@ function clique(event){
 		estadoAtual = estados.jogando
 	}else if(estadoAtual == estados.perdeu && bloco.y >= 2 * ALTURA){
 		estadoAtual = estados.jogar
-		bloco.velocidade = 0
-		bloco.y = 0
+		obstaculos.limpa()
+		bloco.reset()
 	}
 
 }
@@ -147,8 +169,6 @@ function atualiza(){
 
 	if (estadoAtual == estados.jogando){
 		obstaculos.atualiza()	
-	}else if(estadoAtual == estados.perdeu){
-		obstaculos.limpa()
 	}
 
 }
@@ -156,15 +176,43 @@ function desenha(){
 	ctx.fillStyle = '#80daff'
 	ctx.fillRect(0, 0, LARGURA, ALTURA)
 
+	ctx.fillStyle = 'white'
+	ctx.font = '50px Arial'
+	ctx.fillText(bloco.score, 30, 68)
+
 	if(estadoAtual == estados.jogar){
 		ctx.fillStyle = 'green'
 		ctx.fillRect(LARGURA/2 -50, ALTURA/2 - 50, 100, 100)
 	}else if(estadoAtual == estados.perdeu){
 		ctx.fillStyle = 'red'
 		ctx.fillRect(LARGURA/2 -50, ALTURA/2 - 50, 100, 100)
-	}else if (estadoAtual = estados.jogando){
-	obstaculos.desenha()
 
+		ctx.save()
+		ctx.translate(LARGURA/2, ALTURA/2)
+		ctx.fillStyle = 'white'
+
+		if (bloco.score > record){
+			ctx.fillText('Novo Record!', -150, -65)
+		}else if (record < 10){
+			ctx.fillText('Record ' + record, -99, -65)
+		}else if (record >= 10 && record < 100){
+			ctx.fillText('Record ' + record, -112, -65)
+		}else{
+			ctx.fillText('Record ' + record, -125, -65)
+		}
+		//Filtro do digito do score na tela*
+		if (bloco.score < 10){
+			ctx.fillText(bloco.score, -13, 19)
+		}else if (bloco.score >= 10 && bloco.score < 100){
+			ctx.fillText(bloco.score, -26,19)
+		}else {
+			ctx.fillText(bloco.score, -39, 19)
+		}
+
+		ctx.restore()
+
+	}else if (estadoAtual = estados.jogando){
+		obstaculos.desenha()
 	}
 
 	chao.desenha()
